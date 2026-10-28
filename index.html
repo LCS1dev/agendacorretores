@@ -93,8 +93,6 @@ td.n{text-align:center;font-variant-numeric:tabular-nums} th.n{text-align:center
       <div class="sub"><b id="optname"></b> · Plantão 1: Vila Helena · Plantão 2: São Bento · Segunda a sábado</div>
     </div>
     <div class="bar no-print">
-      <button class="btn opt on" data-opt="1">Opção 1 · Todos no sábado</button>
-      <button class="btn opt" data-opt="2">Opção 2 · 1 em HO no sábado</button>
       <button class="btn" onclick="printPart('all')">Imprimir tudo</button>
       <button class="btn" onclick="printPart('cal')">Imprimir calendário</button>
       <button class="btn" onclick="printPart('tab')">Imprimir tabelas</button>
@@ -184,7 +182,7 @@ function dayPlan(opt, d){
 }
 function parse(v){ return v.startsWith('REF:') ? {k:v.slice(4), ref:true} : {k:v, ref:false}; }
 
-let OPT = 1, FILTER = '';
+let OPT = 2, FILTER = '';
 
 const DESC = {
   1: '<b>Opção 1 — Todos trabalhando aos sábados.</b> No sábado os três estão nos plantões: um em cada ponto e o corretor de suporte da semana reforça um deles (alterna entre Vila Helena e São Bento a cada semana). Os dias de home office ficam de segunda a sexta.',
