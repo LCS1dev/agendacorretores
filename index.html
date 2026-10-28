@@ -38,6 +38,8 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
 .wd{display:none;font-size:13px;color:var(--muted)}
 .hol{font-size:10.5px;font-weight:700;color:#e03131;background:#fff5f5;border:1px solid #ffc9c9;border-radius:999px;padding:1px 7px}
 .none{font-size:12px;color:var(--muted)}
+.day.closed{background:repeating-linear-gradient(135deg,#fff5f5,#fff5f5 8px,#fff 8px,#fff 16px);border-color:#ffc9c9}
+.closedtag{font-size:12px;font-weight:700;color:#c92a2a;margin-top:auto;margin-bottom:auto;text-align:center}
 .chip{display:flex;flex-direction:column;gap:1px;font-size:12px;padding:5px 7px;border-radius:7px;border-left:4px solid var(--p);transition:opacity .15s}
 .chip b{font-size:12px;color:var(--p)}
 .chip span{font-weight:600}
@@ -137,8 +139,9 @@ td.n{text-align:center;font-variant-numeric:tabular-nums} th.n{text-align:center
   <p class="foot">
     Lógica da escala: em cada semana, um corretor fica fixo em Vila Helena, outro fixo em São Bento e o terceiro é o <b>suporte</b>,
     que vai pessoalmente ao plantão desfalcado nos dias de home office dos outros dois. As funções giram toda semana:
-    quem estava em Vila Helena vai para São Bento, quem estava em São Bento vira suporte, e o suporte assume Vila Helena. Cada corretor fixo tem 2 dias de home office por semana; domingo não há plantão.<br>
-    Feriados marcados em vermelho (Finados 02/11 e Consciência Negra 20/11) — confirme se os plantões abrem nesses dias.
+    quem estava em Vila Helena vai para São Bento, quem estava em São Bento vira suporte, e o suporte assume Vila Helena.
+    Cada corretor tem 1 dia de home office por semana (Miro seg · Leticia qua · Marcelo sex); domingo não há plantão.<br>
+    Feriados (Finados 02/11 e Consciência Negra 20/11): plantões fechados.
   </p>
 </div>
 
@@ -161,23 +164,24 @@ const WEEKS = [
   {n:5, start:30, end:30, A:'Miro',    B:'Leticia', C:'Marcelo', reforco:'VH'}
 ];
 const HOL = {2:'Finados', 15:'Proclamação da República', 20:'Consciência Negra'};
-// Segunda a sexta: [A, B, C]
-const BASE = [
-  ['VH','SB','HO'],      // seg
-  ['HO','SB','VH'],      // ter
-  ['VH','HO','SB'],      // qua
-  ['HO','SB','VH'],      // qui
-  ['VH','HO','SB']       // sex
-];
-function satRow(opt, w){ return opt === 1 ? ['VH','SB','REF:'+w.reforco] : ['VH','SB','HO']; }
+// Dia fixo de home office de cada corretor (1 = segunda ... 6 = sábado)
+const HO_DAY = {Miro:1, Leticia:3, Marcelo:5};
+// Onde o suporte reforça nos dias em que os três estão presentes
+function reforcoDe(dow, w){ return dow === 2 ? 'VH' : dow === 4 ? 'SB' : w.reforco; }
 
 function dayPlan(opt, d){
   const dow = (d - 1) % 7;           // 01/11/2026 é domingo
   if (dow === 0) return null;
+  if (HOL[d]) return 'closed';       // feriado: plantão fechado
   const w = [...WEEKS].reverse().find(x => x.start <= d);
-  const row = dow === 6 ? satRow(opt, w) : BASE[dow - 1];
   const out = {};
-  [w.A, w.B, w.C].forEach((p, i) => out[p] = row[i]);
+  const ho = p => HO_DAY[p] === dow;
+  out[w.A] = ho(w.A) ? 'HO' : 'VH';
+  out[w.B] = ho(w.B) ? 'HO' : 'SB';
+  if (ho(w.C)) out[w.C] = 'HO';
+  else if (ho(w.A)) out[w.C] = 'VH';
+  else if (ho(w.B)) out[w.C] = 'SB';
+  else out[w.C] = 'REF:' + reforcoDe(dow, w);
   return out;
 }
 function parse(v){ return v.startsWith('REF:') ? {k:v.slice(4), ref:true} : {k:v, ref:false}; }
@@ -190,8 +194,8 @@ const DESC = {
 };
 
 function render(){
-  document.getElementById('optdesc').innerHTML = DESC[OPT];
-  document.getElementById('optname').textContent = OPT === 1 ? 'Opção 1 — Todos no sábado' : 'Opção 2 — 1 em HO no sábado';
+  document.getElementById('optdesc').innerHTML = '<b>Home office fixo, 1 dia por semana:</b> Miro às segundas, Leticia às quartas e Marcelo às sextas. Nesses dias o corretor de suporte da semana cobre o plantão de quem está em casa. Nas terças, quintas e sábados os três estão presentes e o suporte reforça um dos plantões. Feriados: plantões fechados.';
+  document.getElementById('optname').textContent = 'Escala definitiva';
   const cal = document.getElementById('cal');
   cal.innerHTML = '';
   ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(n => {
@@ -203,10 +207,12 @@ function render(){
   for (let d = 1; d <= 30; d++){
     const dow = (d - 1) % 7, plan = dayPlan(OPT, d);
     const c = document.createElement('div');
-    c.className = 'day' + (plan ? '' : ' off');
+    c.className = 'day' + (plan === null ? ' off' : plan === 'closed' ? ' closed' : '');
     let h = `<div class="dh"><span class="num">${d}</span><span class="wd">${WD[dow]}</span>${HOL[d] ? `<span class="hol">${HOL[d]}</span>` : ''}</div>`;
-    if (!plan){
+    if (plan === null){
       h += '<div class="none">Sem plantão</div>';
+    } else if (plan === 'closed'){
+      h += '<div class="closedtag">Plantões fechados<br>(feriado)</div>';
     } else {
       const places = new Set();
       P.forEach(p => {
@@ -223,12 +229,12 @@ function render(){
 
   const ck = document.getElementById('check');
   ck.className = 'check ' + (allOk ? 'ok' : 'bad');
-  ck.textContent = allOk ? '✓ Todos os dias de segunda a sábado têm 1 corretor em Vila Helena e 1 em São Bento.' : '⚠ Há dias sem cobertura em algum plantão.';
+  ck.textContent = allOk ? '✓ Todos os dias de plantão aberto têm pelo menos 1 corretor em Vila Helena e 1 em São Bento.' : '⚠ Há dias sem cobertura em algum plantão.';
 
   document.getElementById('weeks').innerHTML = WEEKS.map(w => {
     const per = w.start === w.end ? `${w.start}/11 (seg)` : `${String(w.start).padStart(2,'0')} a ${w.end}/11`;
     const dot = p => `<i class="dot" style="background:${PC[p]}"></i><b>${p}</b>`;
-    const sat = w.end - w.start >= 5 ? (OPT === 1 ? ` · sábado: reforço em ${PLACE[w.reforco].name}` : ' · sábado: home office') : '';
+    const sat = w.end - w.start >= 5 ? ` · sábado: reforço em ${PLACE[w.reforco].name}` : '';
     return `<li><b>Semana ${w.n}</b> (${per})<br>Vila Helena: ${dot(w.A)} · São Bento: ${dot(w.B)} · Suporte: ${dot(w.C)}${sat}</li>`;
   }).join('');
 
