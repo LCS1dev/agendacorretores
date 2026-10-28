@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Escala de Plantões · Novembro 2026</title>
+<style>
+:root{
+  --bg:#f5f4f0;--card:#fff;--ink:#1d1d1f;--muted:#6b6b70;--line:#e2dfd8;
+  --let:#c2255c;--mir:#0b7285;--mar:#d9480f;
+  --vh:#2b8a3e;--vh-bg:#ebfbee;--sb:#5f3dc4;--sb-bg:#f3f0ff;
+  --ho:#1971c2;--ho-bg:#e7f5ff;--fo:#868e96;--fo-bg:#f1f3f5;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:1300px;margin:0 auto;padding:28px 16px 56px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;align-items:flex-end;margin-bottom:18px}
+h1{margin:0;font-size:28px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin-top:4px;font-size:14px}
+.btn{border:1px solid var(--line);background:var(--card);padding:9px 14px;border-radius:999px;font:inherit;font-size:14px;cursor:pointer;color:var(--ink)}
+.btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+.optdesc{font-size:14px;line-height:1.5;margin:0}
+.optdesc b{font-weight:650}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+.check{font-size:13px;margin-top:10px;font-weight:600}
+.check.ok{color:var(--vh)} .check.bad{color:#e03131}
+.cal{display:grid;grid-template-columns:.55fr repeat(6,1fr);gap:6px}
+.dow{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:4px 6px}
+.day{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px;min-height:150px;display:flex;flex-direction:column;gap:5px}
+.day.off{background:transparent;border-style:dashed}
+.blank{background:transparent}
+.dh{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-bottom:2px}
+.num{font-size:18px;font-weight:700}
+.wd{display:none;font-size:13px;color:var(--muted)}
+.hol{font-size:10.5px;font-weight:700;color:#e03131;background:#fff5f5;border:1px solid #ffc9c9;border-radius:999px;padding:1px 7px}
+.none{font-size:12px;color:var(--muted)}
+.chip{display:flex;flex-direction:column;gap:1px;font-size:12px;padding:5px 7px;border-radius:7px;border-left:4px solid var(--p);transition:opacity .15s}
+.chip b{font-size:12px;color:var(--p)}
+.chip span{font-weight:600}
+.chip.vh{background:var(--vh-bg)} .chip.vh span{color:var(--vh)}
+.chip.sb{background:var(--sb-bg)} .chip.sb span{color:var(--sb)}
+.chip.ho{background:var(--ho-bg);border-left-style:dashed} .chip.ho span{color:var(--ho)}
+.chip.folga{background:var(--fo-bg)} .chip.folga span{color:var(--fo)}
+.chip.dim{opacity:.18}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+h2{font-size:16px;margin:0 0 10px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+td.n{text-align:center;font-variant-numeric:tabular-nums} th.n{text-align:center}
+.weeks{margin:0;padding:0;list-style:none;font-size:13.5px;line-height:1.5}
+.weeks li{padding:7px 0;border-bottom:1px solid var(--line)}
+.weeks li:last-child{border:0}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.foot{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.5}
+@media screen and (max-width:860px){
+  .cal{grid-template-columns:1fr}
+  .dow,.blank,.day.off{display:none}
+  .day{min-height:0}
+  .wd{display:inline}
+  .grid2{grid-template-columns:1fr}
+}
+.notice{display:none;background:#fff9db;border:1px solid #ffe066;color:#5c4400;border-radius:10px;padding:10px 14px;font-size:13.5px;margin-bottom:14px}
+.notice.show{display:block}
+@page{size:A4 landscape;margin:8mm}
+@media print{
+  body{background:#fff}.no-print,.notice{display:none !important}.wrap{padding:0;max-width:none}
+  header{margin-bottom:8px} h1{font-size:20px}
+  .panel{padding:10px;margin-bottom:8px}
+  .cal{gap:4px}
+  .day{min-height:0;padding:5px;gap:3px;break-inside:avoid}
+  .num{font-size:14px}
+  .chip{padding:2px 5px;font-size:9.5px;flex-direction:row;gap:4px;flex-wrap:wrap}.chip b{font-size:9.5px}
+  .check{display:none}.optdesc{font-size:11.5px}.legend{margin-top:4px;font-size:11px}
+  .dh{margin-bottom:0}
+  .foot{font-size:10.5px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.print-cal .grid2, body.print-cal .foot{display:none}
+  body.print-tab #info, body.print-tab .cal{display:none}
+  body.print-tab .grid2{margin-top:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Escala de Plantões — Novembro 2026</h1>
+      <div class="sub"><b id="optname"></b> · Plantão 1: Vila Helena · Plantão 2: São Bento · Segunda a sábado</div>
+    </div>
+    <div class="bar no-print">
+      <button class="btn opt on" data-opt="1">Opção 1 · Todos no sábado</button>
+      <button class="btn opt" data-opt="2">Opção 2 · 1 em HO no sábado</button>
+      <button class="btn" onclick="printPart('all')">Imprimir tudo</button>
+      <button class="btn" onclick="printPart('cal')">Imprimir calendário</button>
+      <button class="btn" onclick="printPart('tab')">Imprimir tabelas</button>
+    </div>
+  </header>
+
+  <div class="notice" id="notice">
+    A impressão não funciona dentro da pré-visualização. Baixe o arquivo e abra no navegador (Chrome, Edge…) para usar os botões —
+    ou use os PDFs prontos que acompanham a escala.
+  </div>
+
+  <div class="panel" id="info">
+    <p class="optdesc" id="optdesc"></p>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--vh)"></i>Plantão Vila Helena</span>
+      <span><i class="sw" style="background:var(--sb)"></i>Plantão São Bento</span>
+      <span><i class="sw" style="background:var(--ho)"></i>Home office</span>
+    </div>
+    <div class="bar no-print" style="margin-top:12px">
+      <span style="font-size:13px;color:var(--muted);margin-right:4px">Destacar:</span>
+      <button class="btn pf on" data-p="">Todos</button>
+      <button class="btn pf" data-p="Leticia">Leticia</button>
+      <button class="btn pf" data-p="Miro">Miro</button>
+      <button class="btn pf" data-p="Marcelo">Marcelo</button>
+    </div>
+    <div class="check" id="check"></div>
+  </div>
+
+  <div class="cal" id="cal"></div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>Quem faz o quê em cada semana</h2>
+      <ul class="weeks" id="weeks"></ul>
+    </div>
+    <div class="panel">
+      <h2>Resumo do mês por corretor</h2>
+      <table id="sum"></table>
+    </div>
+  </div>
+
+  <p class="foot">
+    Lógica da escala: em cada semana, um corretor fica fixo em Vila Helena, outro fixo em São Bento e o terceiro é o <b>suporte</b>,
+    que vai pessoalmente ao plantão desfalcado nos dias de home office dos outros dois. As funções giram toda semana:
+    quem estava em Vila Helena vai para São Bento, quem estava em São Bento vira suporte, e o suporte assume Vila Helena. Cada corretor fixo tem 2 dias de home office por semana; domingo não há plantão.<br>
+    Feriados marcados em vermelho (Finados 02/11 e Consciência Negra 20/11) — confirme se os plantões abrem nesses dias.
+  </p>
+</div>
+
+<script>
+const P = ['Leticia','Miro','Marcelo'];
+const PC = {Leticia:'var(--let)', Miro:'var(--mir)', Marcelo:'var(--mar)'};
+const WD = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const PLACE = {
+  VH:{short:'Plantão Vila Helena', name:'Vila Helena', cls:'vh'},
+  SB:{short:'Plantão São Bento', name:'São Bento', cls:'sb'},
+  HO:{short:'Home office', cls:'ho'},
+  FOLGA:{short:'Folga', cls:'folga'}
+};
+// A = fixo Vila Helena, B = fixo São Bento, C = suporte
+const WEEKS = [
+  {n:1, start:2,  end:7,  A:'Leticia', B:'Marcelo', C:'Miro',    reforco:'VH'},
+  {n:2, start:9,  end:14, A:'Miro',    B:'Leticia', C:'Marcelo', reforco:'SB'},
+  {n:3, start:16, end:21, A:'Marcelo', B:'Miro',    C:'Leticia', reforco:'VH'},
+  {n:4, start:23, end:28, A:'Leticia', B:'Marcelo', C:'Miro',    reforco:'SB'},
+  {n:5, start:30, end:30, A:'Miro',    B:'Leticia', C:'Marcelo', reforco:'VH'}
+];
+const HOL = {2:'Finados', 15:'Proclamação da República', 20:'Consciência Negra'};
+// Segunda a sexta: [A, B, C]
+const BASE = [
+  ['VH','SB','HO'],      // seg
+  ['HO','SB','VH'],      // ter
+  ['VH','HO','SB'],      // qua
+  ['HO','SB','VH'],      // qui
+  ['VH','HO','SB']       // sex
+];
+function satRow(opt, w){ return opt === 1 ? ['VH','SB','REF:'+w.reforco] : ['VH','SB','HO']; }
+
+function dayPlan(opt, d){
+  const dow = (d - 1) % 7;           // 01/11/2026 é domingo
+  if (dow === 0) return null;
+  const w = [...WEEKS].reverse().find(x => x.start <= d);
+  const row = dow === 6 ? satRow(opt, w) : BASE[dow - 1];
+  const out = {};
+  [w.A, w.B, w.C].forEach((p, i) => out[p] = row[i]);
+  return out;
+}
+function parse(v){ return v.startsWith('REF:') ? {k:v.slice(4), ref:true} : {k:v, ref:false}; }
+
+let OPT = 1, FILTER = '';
+
+const DESC = {
+  1: '<b>Opção 1 — Todos trabalhando aos sábados.</b> No sábado os três estão nos plantões: um em cada ponto e o corretor de suporte da semana reforça um deles (alterna entre Vila Helena e São Bento a cada semana). Os dias de home office ficam de segunda a sexta.',
+  2: '<b>Opção 2 — Um corretor de home office aos sábados.</b> No sábado ficam um corretor em cada plantão e o suporte da semana trabalha de home office. Como o suporte roda toda semana, o HO de sábado também é revezado.'
+};
+
+function render(){
+  document.getElementById('optdesc').innerHTML = DESC[OPT];
+  document.getElementById('optname').textContent = OPT === 1 ? 'Opção 1 — Todos no sábado' : 'Opção 2 — 1 em HO no sábado';
+  const cal = document.getElementById('cal');
+  cal.innerHTML = '';
+  ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(n => {
+    const h = document.createElement('div'); h.className = 'dow'; h.textContent = n; cal.appendChild(h);
+  });
+  const sum = {}; P.forEach(p => sum[p] = {VH:0,SB:0,HO:0,sat:0});
+  let allOk = true;
+
+  for (let d = 1; d <= 30; d++){
+    const dow = (d - 1) % 7, plan = dayPlan(OPT, d);
+    const c = document.createElement('div');
+    c.className = 'day' + (plan ? '' : ' off');
+    let h = `<div class="dh"><span class="num">${d}</span><span class="wd">${WD[dow]}</span>${HOL[d] ? `<span class="hol">${HOL[d]}</span>` : ''}</div>`;
+    if (!plan){
+      h += '<div class="none">Sem plantão</div>';
+    } else {
+      const places = new Set();
+      P.forEach(p => {
+        const {k, ref} = parse(plan[p]); const pl = PLACE[k];
+        places.add(k); sum[p][k]++;
+        if (dow === 6 && (k === 'VH' || k === 'SB')) sum[p].sat++;
+        h += `<div class="chip ${pl.cls}" data-p="${p}" style="--p:${PC[p]}"><b>${p}</b><span>${pl.short}${ref ? ' (reforço)' : ''}</span></div>`;
+      });
+      if (!places.has('VH') || !places.has('SB')) allOk = false;
+    }
+    c.innerHTML = h; cal.appendChild(c);
+  }
+  for (let i = 0; i < 5; i++){ const b = document.createElement('div'); b.className = 'blank'; cal.appendChild(b); }
+
+  const ck = document.getElementById('check');
+  ck.className = 'check ' + (allOk ? 'ok' : 'bad');
+  ck.textContent = allOk ? '✓ Todos os dias de segunda a sábado têm 1 corretor em Vila Helena e 1 em São Bento.' : '⚠ Há dias sem cobertura em algum plantão.';
+
+  document.getElementById('weeks').innerHTML = WEEKS.map(w => {
+    const per = w.start === w.end ? `${w.start}/11 (seg)` : `${String(w.start).padStart(2,'0')} a ${w.end}/11`;
+    const dot = p => `<i class="dot" style="background:${PC[p]}"></i><b>${p}</b>`;
+    const sat = w.end - w.start >= 5 ? (OPT === 1 ? ` · sábado: reforço em ${PLACE[w.reforco].name}` : ' · sábado: home office') : '';
+    return `<li><b>Semana ${w.n}</b> (${per})<br>Vila Helena: ${dot(w.A)} · São Bento: ${dot(w.B)} · Suporte: ${dot(w.C)}${sat}</li>`;
+  }).join('');
+
+  document.getElementById('sum').innerHTML =
+    `<tr><th>Corretor</th><th class="n">Vila Helena</th><th class="n">São Bento</th><th class="n">Home office</th><th class="n">Sábados no plantão</th></tr>` +
+    P.map(p => `<tr><td><i class="dot" style="background:${PC[p]}"></i><b>${p}</b></td><td class="n">${sum[p].VH}</td><td class="n">${sum[p].SB}</td><td class="n">${sum[p].HO}</td><td class="n">${sum[p].sat}</td></tr>`).join('');
+
+  applyFilter();
+}
+
+function applyFilter(){
+  document.querySelectorAll('.chip').forEach(ch => ch.classList.toggle('dim', !!FILTER && ch.dataset.p !== FILTER));
+}
+document.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+  OPT = +b.dataset.opt;
+  document.querySelectorAll('.opt').forEach(x => x.classList.toggle('on', x === b));
+  render();
+});
+document.querySelectorAll('.pf').forEach(b => b.onclick = () => {
+  FILTER = b.dataset.p;
+  document.querySelectorAll('.pf').forEach(x => x.classList.toggle('on', x === b));
+  applyFilter();
+});
+function printPart(part){
+  document.body.classList.remove('print-cal','print-tab');
+  if (part !== 'all') document.body.classList.add('print-' + part);
+  let embedded = false;
+  try { embedded = window.self !== window.top; } catch(e){ embedded = true; }
+  try { window.print(); } catch(e){ embedded = true; }
+  if (embedded) document.getElementById('notice').classList.add('show');
+}
+window.addEventListener('afterprint', () => document.body.classList.remove('print-cal','print-tab'));
+// Parâmetros opcionais: ?opt=2&print=cal
+(function(){
+  const q = new URLSearchParams(location.search);
+  if (q.get('opt') === '2'){ OPT = 2; document.querySelectorAll('.opt').forEach(x => x.classList.toggle('on', x.dataset.opt === '2')); }
+  const pr = q.get('print'); if (pr === 'cal' || pr === 'tab') document.body.classList.add('print-' + pr);
+})();
+render();
+</script>
+</body>
+</html>
