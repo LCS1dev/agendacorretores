@@ -49,7 +49,10 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
 .chip.vh{background:var(--vh-bg)} .chip.vh span{color:var(--vh)}
 .chip.sb{background:var(--sb-bg)} .chip.sb span{color:var(--sb)}
 .chip.ho{background:var(--ho-bg);border-left-style:dashed} .chip.ho span{color:var(--ho)}
+.chip.fe{background:#fff4e0}.chip.fe span{color:#b35c00}
 .chip.dim{opacity:.18}
+.fe-tag{font-size:10.5px;font-weight:700;color:#b35c00;background:#fff4e0;border:1px solid #ffc078;border-radius:999px;padding:1px 7px}
+.day.fer{border-color:#ffc078;box-shadow:inset 0 0 0 1px #ffc078}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
 h2{font-size:16px;margin:0 0 10px}
 table{width:100%;border-collapse:collapse;font-size:13.5px}
@@ -115,6 +118,7 @@ td.n{text-align:center;font-variant-numeric:tabular-nums} th.n{text-align:center
       <span><i class="sw" style="background:var(--vh)"></i>Plantão Vila Helena</span>
       <span><i class="sw" style="background:var(--sb)"></i>Plantão São Bento</span>
       <span><i class="sw" style="background:var(--ho)"></i>Home office</span>
+      <span><i class="sw" style="background:#f08c00"></i>Feirão Casa Paulista</span>
       <span><i class="sw" style="background:#ffc9c9"></i>Feriado (plantões fechados)</span>
       <span><i class="sw" style="background:#ffd8a8"></i>Véspera de festa</span>
     </div>
@@ -145,8 +149,9 @@ td.n{text-align:center;font-variant-numeric:tabular-nums} th.n{text-align:center
     Lógica da escala: em cada semana, um corretor fica fixo em Vila Helena, outro fixo em São Bento e o terceiro é o <b>suporte</b>,
     que vai pessoalmente ao plantão desfalcado nos dias de home office. As funções giram toda semana, dando continuidade a novembro:
     quem estava em Vila Helena vai para São Bento, quem estava em São Bento vira suporte, e o suporte assume Vila Helena.
-    Home office fixo: Miro seg · Leticia qua · Marcelo sex. Domingo não há plantão.<br>
+    Home office fixo: Miro seg · Leticia qua · Marcelo sex, mais um 2º home office por semana (terça, quinta ou sábado, em rodízio) a partir de 07/12. Domingo não há plantão, exceto no Feirão.<br>
     Dia 01/12: Leticia atende cliente na Vila Helena, então ela e Miro trocam de plantão só nesse dia.<br>
+    Feirão Casa Paulista (04, 05 e 06/12): os três corretores ficam no evento, sem plantão nos dois pontos de venda.<br>
     Natal (25/12): plantões fechados. Véspera de Natal (24/12): sinalizada em laranja, plantão aberto — confirme se haverá horário reduzido.
   </p>
 </div>
@@ -166,19 +171,22 @@ const pad = n => String(n).padStart(2,'0');
 
 // A = fixo Vila Helena, B = fixo São Bento, C = suporte (continuação do rodízio de novembro)
 const WEEKS = [
-  {n:1, start:1,  end:5,  A:'Miro',    B:'Leticia', C:'Marcelo'},
+  {n:1, start:1,  end:6,  A:'Miro',    B:'Leticia', C:'Marcelo', note:'Semana do Feirão: sex 04, sáb 05 e dom 06 todos no evento. O HO de Miro foi na seg 30/11 (escala de novembro); nesta semana cada um fica com 1 HO.'},
   {n:2, start:7,  end:12, A:'Marcelo', B:'Miro',    C:'Leticia'},
   {n:3, start:14, end:19, A:'Leticia', B:'Marcelo', C:'Miro'},
   {n:4, start:21, end:25, A:'Miro',    B:'Leticia', C:'Marcelo'}
 ];
 const HOL = {25:'Natal'};                          // plantões fechados
 const EVE = {24:'Véspera de Natal'};               // sinalizado, plantão aberto
+const FEIRAO = {4:1, 5:1, 6:1};                    // Feirão Casa Paulista: os três no evento
 const HO_FIXO = {1:'Miro', 3:'Leticia', 5:'Marcelo'};   // getDay(): seg, qua, sex
-const SAB = {5:'Marcelo', 12:'Miro', 19:'Leticia'};     // 1 corretor de HO por sábado, em rodízio
+const SAB = {12:'Miro', 19:'Leticia'};             // sábados de HO, em rodízio (05/12 é Feirão)
+// 2º home office de terça/quinta (a partir de 07/12) + HO do Marcelo na quinta 03/12
+const EXTRA = {3:'Marcelo', 8:'Marcelo', 10:'Leticia', 15:'Marcelo', 17:'Miro', 22:'Marcelo', 24:'Miro'};
 
-const NAME = {A:'Sábado de home office rotativo'};
+const NAME = {A:'Feirão Casa Paulista + 2 HO por semana'};
 const DESC = {
-  A: '<b>Home office fixo + sábado rotativo.</b> Cada corretor tem 1 dia fixo de home office por semana (Miro seg · Leticia qua · Marcelo sex). Aos sábados fica 1 corretor de home office por vez, em rodízio — Marcelo 05/12, Miro 12/12 e Leticia 19/12 — e os outros dois ficam um em cada plantão. Terças e quintas os três estão presentes e o suporte reforça um plantão.'
+  A: '<b>Feirão Casa Paulista nos dias 04, 05 e 06/12:</b> os três corretores trabalham no evento (sexta, sábado e domingo). Na semana do feirão cada um fica com 1 home office (Miro seg 30/11, Leticia qua 02, Marcelo qui 03). <b>A partir de 07/12</b> voltam os 2 home offices por semana para cada corretor: o dia fixo (Miro seg · Leticia qua · Marcelo sex) mais um em terça, quinta ou sábado, em rodízio. Os sábados de HO são alternados (Miro 12/12 e Leticia 19/12), e todo dia aberto tem sempre 1 corretor em cada plantão.'
 };
 
 let OPT = 'A', FILTER = '';
@@ -190,11 +198,13 @@ function hoList(opt, d){
   const s = [];
   if (HO_FIXO[dow]) s.push(HO_FIXO[dow]);
   if (dow === 6 && SAB[d]) s.push(SAB[d]);
+  if (EXTRA[d]) s.push(EXTRA[d]);
   return s;
 }
 
 function dayPlan(opt, d){
   const dow = new Date(YEAR, MONTH, d).getDay();
+  if (FEIRAO[d]) return 'feirao';              // Feirão Casa Paulista
   if (dow === 0) return null;                  // domingo
   if (HOL[d]) return 'closed';                 // feriado: plantão fechado
   const w = weekOf(d), a = w.A, b = w.B, c = w.C;
@@ -229,7 +239,7 @@ function render(){
   const lead = new Date(YEAR, MONTH, 1).getDay();
   for (let i = 0; i < lead; i++){ const b = document.createElement('div'); b.className = 'blank'; cal.appendChild(b); }
 
-  const sum = {}; P.forEach(p => sum[p] = {VH:0,SB:0,HO:0,sat:0});
+  const sum = {}; P.forEach(p => sum[p] = {VH:0,SB:0,HO:0,FE:0,sat:0});
   const plans = {};
   let allOk = true, tooManyHO = false;
 
@@ -237,13 +247,18 @@ function render(){
     const dow = new Date(YEAR, MONTH, d).getDay(), plan = dayPlan(OPT, d);
     plans[d] = plan;
     const c = document.createElement('div');
-    c.className = 'day' + (plan === null ? ' off' : plan === 'closed' ? ' closed' : '') + (EVE[d] ? ' evday' : '');
+    c.className = 'day' + (plan === null ? ' off' : plan === 'closed' ? ' closed' : '') + (EVE[d] ? ' evday' : '') + (plan === 'feirao' ? ' fer' : '');
     let h = `<div class="dh"><span class="num">${d}</span><span class="wd">${WD[dow]}</span>` +
-            `${HOL[d] ? `<span class="hol">${HOL[d]}</span>` : ''}${EVE[d] ? `<span class="eve">${EVE[d]}</span>` : ''}</div>`;
+            `${HOL[d] ? `<span class="hol">${HOL[d]}</span>` : ''}${EVE[d] ? `<span class="eve">${EVE[d]}</span>` : ''}${plan === 'feirao' ? '<span class="fe-tag">Feirão</span>' : ''}</div>`;
     if (plan === null){
       h += '<div class="none">Sem plantão</div>';
     } else if (plan === 'closed'){
       h += '<div class="closedtag">Plantões fechados<br>(feriado)</div>';
+    } else if (plan === 'feirao'){
+      P.forEach(p => {
+        sum[p].FE++;
+        h += `<div class="chip fe" data-p="${p}" style="--p:${PC[p]}"><b>${p}</b><span>Feirão Casa Paulista</span></div>`;
+      });
     } else {
       const places = new Set(); let nHO = 0;
       P.forEach(p => {
@@ -262,7 +277,7 @@ function render(){
   const ck = document.getElementById('check');
   const ok = allOk && !tooManyHO;
   ck.className = 'check ' + (ok ? 'ok' : 'bad');
-  ck.textContent = ok ? '✓ Todos os dias com plantão aberto (inclusive todos os sábados) têm 1 corretor em Vila Helena e 1 em São Bento.' : '⚠ Há dias sem cobertura em algum plantão.';
+  ck.textContent = ok ? '✓ Todos os dias com plantão aberto (inclusive os sábados) têm 1 corretor em Vila Helena e 1 em São Bento. Nos dias do Feirão os três estão no evento.' : '⚠ Há dias sem cobertura em algum plantão.';
 
   document.getElementById('weeks').innerHTML = WEEKS.map(w => {
     const dot = p => `<i class="dot" style="background:${PC[p]}"></i><b>${p}</b>`;
@@ -270,16 +285,16 @@ function render(){
       const ds = [];
       for (let d = w.start; d <= w.end; d++){
         const pl = plans[d];
-        if (pl && pl !== 'closed' && pl[p].k === 'HO') ds.push(`${WD3[new Date(YEAR, MONTH, d).getDay()]} ${pad(d)}`);
+        if (pl && typeof pl === 'object' && pl[p].k === 'HO') ds.push(`${WD3[new Date(YEAR, MONTH, d).getDay()]} ${pad(d)}`);
       }
       return `${dot(p)} ${ds.length ? ds.join(', ') : '—'}`;
     }).join(' · ');
-    return `<li><b>Semana ${w.n}</b> (${pad(w.start)} a ${pad(w.end)}/12)<br>Vila Helena: ${dot(w.A)} · São Bento: ${dot(w.B)} · Suporte: ${dot(w.C)}<br><small>Home office: ${hoTxt}</small></li>`;
+    return `<li><b>Semana ${w.n}</b> (${pad(w.start)} a ${pad(w.end)}/12)<br>Vila Helena: ${dot(w.A)} · São Bento: ${dot(w.B)} · Suporte: ${dot(w.C)}<br><small>Home office: ${hoTxt}</small>${w.note ? `<br><small>${w.note}</small>` : ''}</li>`;
   }).join('');
 
   document.getElementById('sum').innerHTML =
-    `<tr><th>Corretor</th><th class="n">Vila Helena</th><th class="n">São Bento</th><th class="n">Home office</th><th class="n">Sábados no plantão</th></tr>` +
-    P.map(p => `<tr><td><i class="dot" style="background:${PC[p]}"></i><b>${p}</b></td><td class="n">${sum[p].VH}</td><td class="n">${sum[p].SB}</td><td class="n">${sum[p].HO}</td><td class="n">${sum[p].sat}</td></tr>`).join('');
+    `<tr><th>Corretor</th><th class="n">Vila Helena</th><th class="n">São Bento</th><th class="n">Home office</th><th class="n">Feirão</th><th class="n">Sábados no plantão</th></tr>` +
+    P.map(p => `<tr><td><i class="dot" style="background:${PC[p]}"></i><b>${p}</b></td><td class="n">${sum[p].VH}</td><td class="n">${sum[p].SB}</td><td class="n">${sum[p].HO}</td><td class="n">${sum[p].FE}</td><td class="n">${sum[p].sat}</td></tr>`).join('');
 
   applyFilter();
 }
