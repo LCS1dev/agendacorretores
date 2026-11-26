@@ -119,8 +119,7 @@ td.n{text-align:center;font-variant-numeric:tabular-nums} th.n{text-align:center
       <span><i class="sw" style="background:var(--sb)"></i>Plantão São Bento</span>
       <span><i class="sw" style="background:var(--ho)"></i>Home office</span>
       <span><i class="sw" style="background:#f08c00"></i>Feirão Casa Paulista</span>
-      <span><i class="sw" style="background:#ffc9c9"></i>Feriado (plantões fechados)</span>
-      <span><i class="sw" style="background:#ffd8a8"></i>Véspera de festa</span>
+      <span><i class="sw" style="background:#ffc9c9"></i>Feriado / véspera (plantões fechados)</span>
     </div>
     <div class="bar no-print" style="margin-top:12px">
       <span style="font-size:13px;color:var(--muted);margin-right:4px">Destacar:</span>
@@ -152,7 +151,7 @@ td.n{text-align:center;font-variant-numeric:tabular-nums} th.n{text-align:center
     Home office fixo: Miro seg · Leticia qua · Marcelo sex, mais um 2º home office por semana (terça, quinta ou sábado, em rodízio) a partir de 07/12. Domingo não há plantão, exceto no Feirão.<br>
     Dia 01/12: Leticia atende cliente na Vila Helena, então ela e Miro trocam de plantão só nesse dia.<br>
     Feirão Casa Paulista (04, 05 e 06/12): os três corretores ficam no evento, sem plantão nos dois pontos de venda.<br>
-    Natal (25/12): plantões fechados. Véspera de Natal (24/12): sinalizada em laranja, plantão aberto — confirme se haverá horário reduzido.
+    Véspera de Natal (24/12) e Natal (25/12): plantões fechados.
   </p>
 </div>
 
@@ -176,13 +175,13 @@ const WEEKS = [
   {n:3, start:14, end:19, A:'Leticia', B:'Marcelo', C:'Miro'},
   {n:4, start:21, end:25, A:'Miro',    B:'Leticia', C:'Marcelo'}
 ];
-const HOL = {25:'Natal'};                          // plantões fechados
-const EVE = {24:'Véspera de Natal'};               // sinalizado, plantão aberto
+const HOL = {24:'Véspera de Natal', 25:'Natal'};   // plantões fechados
+const EVE = {};                                    // vésperas com plantão aberto (nenhuma)
 const FEIRAO = {4:1, 5:1, 6:1};                    // Feirão Casa Paulista: os três no evento
 const HO_FIXO = {1:'Miro', 3:'Leticia', 5:'Marcelo'};   // getDay(): seg, qua, sex
 const SAB = {12:'Miro', 19:'Leticia'};             // sábados de HO, em rodízio (05/12 é Feirão)
 // 2º home office de terça/quinta (a partir de 07/12) + HO do Marcelo na quinta 03/12
-const EXTRA = {3:'Marcelo', 8:'Marcelo', 10:'Leticia', 15:'Marcelo', 17:'Miro', 22:'Marcelo', 24:'Miro'};
+const EXTRA = {3:'Marcelo', 8:'Leticia', 10:'Marcelo', 15:'Marcelo', 17:'Miro', 22:'Marcelo'};
 
 const NAME = {A:'Feirão Casa Paulista + 2 HO por semana'};
 const DESC = {
@@ -253,7 +252,7 @@ function render(){
     if (plan === null){
       h += '<div class="none">Sem plantão</div>';
     } else if (plan === 'closed'){
-      h += '<div class="closedtag">Plantões fechados<br>(feriado)</div>';
+      h += `<div class="closedtag">Plantões fechados<br>(${d === 24 ? 'véspera de Natal' : 'feriado'})</div>`;
     } else if (plan === 'feirao'){
       P.forEach(p => {
         sum[p].FE++;
